@@ -1,0 +1,16 @@
+# Ignore all
+*
+
+# Exclude these files:
+!/**/
+!**/*.c
+!**/*.h
+!**/*.cpp
+!**/*.hpp
+!**/*.sh
+!**/*.md
+!.gitignore
+!Makefile
+!*.bmp
+!*.png
+!maps/*
