@@ -31,6 +31,7 @@ Buffer::Buffer(const Buffer &src)
 Buffer &Buffer::operator=(const Buffer &src)
 {
     // TODO(13.7.24): insert return statement here
+    return *this;
 }
 
 Buffer::~Buffer()

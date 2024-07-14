@@ -9,7 +9,6 @@
 
 #include "my_int.h"
 
-
 class Sprite
 {
 public:

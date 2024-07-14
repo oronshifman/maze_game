@@ -1,5 +1,5 @@
 /* ------------------------------------------*/ 
-/* Filename: maze_game/code/MazeGame.hpp     */
+/* Filename: maze_game/include/MazeGame.hpp  */
 /* Date:     11.07.2024                      */
 /* Author:   Oron                            */ 
 /* ------------------------------------------*/
@@ -12,34 +12,24 @@
 
 #include "Buffer.hpp"
 #include "Sprite.hpp"
+#include "Board.hpp"
+#include "Screen.hpp"
+#include "Menus.hpp"
 #include "my_int.h"
 
-enum context
+enum key_codes
 {
-    MAIN_MENU,
-    IN_GAME,
-
-    NUM_CONTEXTS
-};
-
-enum ascii_arrows
-{
-    UP = 38,
-    DOWN = 40,
-    LEFT = 37,
-    RIGHT = 39
-};
-
-enum main_menu_choice
-{
-    START, QUIT,
-
-    NUM_CHOICES
+    ESC_KEY = 27,
+    ENTER_KEY = 150,
+    UP_KEY = 38,
+    DOWN_KEY = 40,
+    LEFT_KEY = 37,
+    RIGHT_KEY = 39
 };
 
 enum move_direction
 {
-    UP, DOWN, LEFT, RIGHT,
+    MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT,
 
     NUM_DIRECTIONS
 };
@@ -58,12 +48,14 @@ public:
     b8 win = 0;
 
 private:
-    b8 InitGameScreen();
+    b8 ConfigTerminal();
     // b8 LoadNewMap(std::ifstream &loadedMap);
     b8 ReadWidthAndHeight(std::ifstream &loadedMap);
 
     void InGameInput(char key);
-    void MainMenuInput(char key);
+
+    Menus menus;
+    Board board;
 
     Buffer map;
     Sprite player;

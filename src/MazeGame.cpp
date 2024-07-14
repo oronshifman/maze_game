@@ -13,22 +13,26 @@
 #include <unistd.h> // for STDOUT_FILENO
 
 #include "MazeGame.hpp"
+#include "Menus.hpp"
+#include "Screen.hpp"
 #include "my_int.h"
 
 static struct termios old, curr;
 
 static b8 GetTerminalSize(u32 *screenHeight, u32 *screenWidth);
 static void ClearTerminal();
-static void DrawMainMenu(main_menu_choice chosen);
 
-MazeGame::MazeGame()
+MazeGame::MazeGame() : menus(MAIN_MENU)
 {
-    if(!InitGameScreen())
+    if(!ConfigTerminal())
     {
         std::cout << "failed to init game" << std::endl;
     }
+
+    board.InitBoard(&map, &player, &goal);
+    
     ClearTerminal();
-    DrawMainMenu(START);
+    menus.Draw();
 }
 
 MazeGame::~MazeGame()
@@ -37,6 +41,7 @@ MazeGame::~MazeGame()
 }
 
 // TODO(13.7.24): implement loading map
+
 // b8 MazeGame::LoadNewMap(std::ifstream &loadedMap)
 // {
 //     b8 status = 1;
@@ -106,39 +111,41 @@ void MazeGame::InGameInput(char key)
     switch(key)
     {
         case 'q':
+        case ESC_KEY:
         {
-            running = 0; // TODO: return to main menu
+            ClearTerminal();
+            menus.Draw();
         } break;
 
-        case ascii_arrows::UP:
+        case UP_KEY:
         {
-            if(posableMoves[UP] >= 0) 
+            if(posableMoves[MOVE_UP] >= 0) 
             {
-                player.yPos = posableMoves[UP];
+                player.yPos = posableMoves[MOVE_UP];
             }
         } break;
 
-        case ascii_arrows::DOWN:
+        case DOWN_KEY:
         {
-            if(posableMoves[DOWN] < map.height) 
+            if(posableMoves[MOVE_DOWN] < map.height) 
             {
-                player.yPos = posableMoves[DOWN];
+                player.yPos = posableMoves[MOVE_DOWN];
             }
         } break;
 
-        case ascii_arrows::LEFT:
+        case LEFT_KEY:
         {
-            if(posableMoves[LEFT] >= 0) 
+            if(posableMoves[MOVE_LEFT] >= 0) 
             {
-                player.xPos = posableMoves[LEFT];
+                player.xPos = posableMoves[MOVE_LEFT];
             }
         } break;
 
-        case ascii_arrows::RIGHT:
+        case RIGHT_KEY:
         {
-            if(posableMoves[RIGHT] < map.width - 1) 
+            if(posableMoves[MOVE_RIGHT] < map.width - 1) 
             {
-                player.xPos = posableMoves[RIGHT];
+                player.xPos = posableMoves[MOVE_RIGHT];
             }
         } break;
 
@@ -149,16 +156,10 @@ void MazeGame::InGameInput(char key)
     }
 }
 
-void MazeGame::MainMenuInput(char key)
-{
-    // TODO(13.7.24): imple!!
-}
-
 b8 MazeGame::DrawBoard()
 {
-    u32 screenHeight = 0, screenWidth = 0;
+    u32 screenHeight = 0, screenWidth = 0; // NOTE(14.7.24): currently not used
     GetTerminalSize(&screenHeight, &screenWidth);
-
 
     return 0;
 }
@@ -170,8 +171,9 @@ void MazeGame::HandleInput(context context)
     switch(context)
     {
         case MAIN_MENU:
+        case START_MENU:
         {
-            MainMenuInput(c);
+            menus.Scroll(c);
         } break;
 
         case IN_GAME:
@@ -188,7 +190,7 @@ void MazeGame::HandleInput(context context)
 
 
 
-b8 MazeGame::InitGameScreen()
+b8 MazeGame::ConfigTerminal()
 {
     b8 status = 1;
 
@@ -237,27 +239,21 @@ static b8 GetTerminalSize(u32 *screenHeight, u32 *screenWidth)
 
 static void ClearTerminal()
 {
-    printf("\033[2J");
+    printf("\e[2J");
     printf("\e[0:0H");
 }
 
-static void DrawMainMenu(main_menu_choice chosen)
-{
-    static char *options[NUM_CHOICES] =
-    {
-        "START",
-        "QUIT"
-    };
-
-    for(u8 option = START; option < NUM_CHOICES; ++option)
-    {
-        if(option == chosen)
-        {
-            printf("\e[48;5;34m");
-            printf("%s\n", options[option]);
-            printf("\e[0m");
-            continue;
-        }
-        printf("%s\n", options[option]);
-    }
-}
+// static void DrawMenu(u8 choice)
+// {
+//     for(u8 option = 0; option < menu.size; ++option)
+//     {
+//         if(option == choice)
+//         {
+//             printf("\e[48;5;34m");
+//             printf("%s\n", menu.options[option]);
+//             printf("\e[0m");
+//             continue;
+//         }
+//         printf("%s\n", menu.options[option]);
+//     }
+// }

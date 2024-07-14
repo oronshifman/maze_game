@@ -14,7 +14,7 @@ int main(void)
 
     while(game.running)
     {
-        game.HandleInput();
+        game.HandleInput(MAIN_MENU);
     }
 
 	return 0;
