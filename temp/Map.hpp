@@ -38,10 +38,11 @@ public:
     Map(std::string fileName);
     ~Map();
 
+    b8 LoadNewMap();
     b8 DrawMap();
 
 private:
-
+    b8 ReadWidthAndHeight(std::ifstream &loadedMap);
     Buffer buf;
 };
 

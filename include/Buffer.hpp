@@ -26,7 +26,6 @@ public:
     u16 xPos;
     u16 yPos;
 
-private:
     char *mem;
 };
 

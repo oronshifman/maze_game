@@ -45,6 +45,7 @@ public:
 
     void Draw();
     void ChangeMenu(context context);
+    std::string GetChosenMapName();
 
     /**
      * if QUIT is chosen, return 0 to turn running to 0

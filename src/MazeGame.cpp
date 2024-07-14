@@ -24,7 +24,7 @@ static b8 ConfigTerminal();
 static b8 DrawBoard();
 
 static b8 GetTerminalSize(u32 *screenHeight, u32 *screenWidth);
-static b8 LoadNewMap(std::ifstream &loadedMap);
+static b8 LoadNewMap();
 static b8 ReadWidthAndHeight(std::ifstream &loadedMap);
 static void LoadBoard();
 
@@ -32,6 +32,9 @@ static void HandleInput();
 static void InGameInput(u8 key);
 
 static void Logic();
+
+static void HideCursor();
+static void ShowCursor();
 
 Menus menus(MAIN_MENU);
 Board board;
@@ -60,6 +63,7 @@ void StartGame()
 void EndGame()
 {
     tcsetattr(0, TCSANOW, &old);
+    ShowCursor();
 }
 
 static void Logic()
@@ -71,50 +75,54 @@ static void Logic()
     }
 }
 
-
 // TODO(13.7.24): implement loading map
-static b8 LoadNewMap(std::ifstream &loadedMap)
+static b8 LoadNewMap()
 {
     b8 status = 1;
 
-    // ReadWidthAndHeight(loadedMap);
+    std::string mapPath = maps_dir + "/" + menus.GetChosenMapName();
 
-    // // seeks to lines to the beginning of the map
-    // loadedMap.ignore(256, '\n');
-    // loadedMap.ignore(256, '\n');
+    std::ifstream loadedMap;
+    loadedMap.open(mapPath);
 
-    // if(map)
-    // {
-    //     char *mapPos;
+    ReadWidthAndHeight(loadedMap);
 
-    //     for(u8 row = 0; row < buf.height; ++row)
-    //     {
-    //         for(u8 col = 0; col < buf.width; ++col)
-    //         {
-    //             mapPos = buf.indexBuffer(row, col);
-    //             *mapPos = loadedMap.get();
+    // seeks to lines to the beginning of the map
+    loadedMap.ignore(256, '\n');
+    loadedMap.ignore(256, '\n');
 
-    //             if(*mapPos == 'P')
-    //             {
-    //                 playerPosition[X] = col;
-    //                 playerPosition[Y] = row;
-    //             }
-    //         }
-    //     }
+    if(map.mem)
+    {
+        char *mapPos;
 
-    //     *mapPos = '\n';
-    // }
-    // else
-    // {
-    //     status = 0;
-    // }
+        for(u8 row = 0; row < map.height; ++row)
+        {
+            for(u8 col = 0; col < map.width; ++col)
+            {
+                mapPos = map.indexBuffer(row, col);
+                *mapPos = loadedMap.get();
+
+                if(*mapPos == 'P')
+                {
+                    player.xPos = col;
+                    player.yPos = row;
+                }
+                else if(*mapPos == 'G')
+                {
+                    goal.xPos = col;
+                    goal.yPos = row;
+                }
+            }
+        }
+
+        *mapPos = '\n';
+    }
+    else
+    {
+        status = 0;
+    }
 
     return status;
-}
-
-static void LoadBoard()
-{
-
 }
 
 static b8 ReadWidthAndHeight(std::ifstream &loadedMap)
@@ -125,8 +133,7 @@ static b8 ReadWidthAndHeight(std::ifstream &loadedMap)
 
     if(tmpWidth < 256 && tmpHeight < 256)
     {
-        map.width = tmpWidth;
-        map.height = tmpHeight;
+        map.InitBuffer(tmpWidth, tmpHeight, 0, 0);
     }
     else
     {
@@ -134,6 +141,11 @@ static b8 ReadWidthAndHeight(std::ifstream &loadedMap)
     }
 
     return 1;
+}
+
+static void LoadBoard()
+{
+
 }
 
 static void InGameInput(u8 key)
@@ -208,8 +220,30 @@ static void HandleInput()
         case MAIN_MENU:
         case START_MENU:
         {
-            b8 ret = menus.Scroll(c);
-            running = ret;
+            switch(menus.Scroll(c))
+            {
+                case STOP_RUNNING:
+                {
+                    running = 0;
+                } break;
+
+                case KEEP_RUNNING:
+                {
+                    // do nothing
+                } break;
+
+                case LOAD_MAP:
+                {
+                    LoadNewMap();
+                    LoadBoard();
+                    screen.ChangeContext(IN_GAME);
+                } break;
+
+                default:
+                {
+                    // do nothing
+                } break;
+            }
         } break;
 
         case IN_GAME:
@@ -223,8 +257,6 @@ static void HandleInput()
         } break;
     }
 }
-
-
 
 static b8 ConfigTerminal()
 {
@@ -246,6 +278,8 @@ static b8 ConfigTerminal()
         {
             status = 0;
         }
+
+        HideCursor();
     }
     else
     {
@@ -253,6 +287,16 @@ static b8 ConfigTerminal()
     }
 
     return status;
+}
+
+static void ShowCursor()
+{
+    printf("\e[?25h");
+}
+
+static void HideCursor()
+{
+    printf("\e[?25l");
 }
 
 static b8 GetTerminalSize(u32 *screenHeight, u32 *screenWidth)

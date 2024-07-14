@@ -20,6 +20,8 @@ struct menu_t
 };
 
 static void UpdateMapsList();
+static void StartMenuHandleInput(Menus menus, u8 curr_option);
+static b8 MainMenuHandleInput(Menus menus, u8 curr_option);
 
 static std::vector<std::string> maps_list;
 
@@ -68,6 +70,11 @@ void Menus::ChangeMenu(context context)
     curr_option = 0;
 }
 
+std::string Menus::GetChosenMapName()
+{
+    return maps_list[curr_option];
+}
+
 void Menus::Draw()
 {
     for(u8 option = 0; option < size; ++option)
@@ -103,54 +110,18 @@ b8 Menus::Scroll(u8 key)
             {
                 case MAIN_MENU:
                 {
-                    switch (curr_option)
-                    {
-                        case main_menu_choices::START:
-                        {
-                            ChangeMenu(START_MENU);
-                        } break;
-
-                        case main_menu_choices::QUIT:
-                        {
-                            return 0;
-                        } break;
-                    
-                        default:
-                        {
-
-                        } break;
-                    }
+                    return MainMenuHandleInput(*this, curr_option);
                 } break;
 
                 case START_MENU:
                 {
-                    switch (curr_option)
-                    {
-                        case start_menu_choices::RANDOM_MAP:
-                        {
-                        } break;
+                    StartMenuHandleInput(*this, curr_option);
+                } break;
 
-                        case start_menu_choices::CHOOSE_MAP:
-                        {
-                            UpdateMapsList();
-                            ChangeMenu(MAPS_MENU);
-                        } break;
-
-                        case start_menu_choices::CREATE_MAP:
-                        {
-                        } break;
-
-                        case start_menu_choices::BACK:
-                        {
-                            ChangeMenu(MAIN_MENU);
-                        } break;
-                    
-                        default:
-                        {
-
-                        } break;
-                    }
-                }
+                case MAPS_MENU:
+                {
+                    return LOAD_MAP;
+                } break;
             }
         }
 
@@ -163,10 +134,61 @@ b8 Menus::Scroll(u8 key)
     return 1;
 }
 
+static void StartMenuHandleInput(Menus menus, u8 curr_option)
+{
+    switch (curr_option)
+    {
+        case start_menu_choices::RANDOM_MAP:
+        {
+        } break;
+
+        case start_menu_choices::CHOOSE_MAP:
+        {
+            UpdateMapsList();
+            menus.ChangeMenu(MAPS_MENU);
+        } break;
+
+        case start_menu_choices::CREATE_MAP:
+        {
+        } break;
+
+        case start_menu_choices::BACK:
+        {
+            menus.ChangeMenu(MAIN_MENU);
+        } break;
+    
+        default:
+        {
+            // do nothing
+        } break;
+    }
+}
+
+static b8 MainMenuHandleInput(Menus menus, u8 curr_option)
+{
+    switch (curr_option)
+    {
+        case main_menu_choices::START:
+        {
+            menus.ChangeMenu(START_MENU);
+        } break;
+
+        case main_menu_choices::QUIT:
+        {
+            return STOP_RUNNING;
+        } break;
+    
+        default:
+        {
+            // do nothing
+        } break;
+    }
+
+    return KEEP_RUNNING;
+}
+
 static void UpdateMapsList()
 {
-    std::string maps_dir = "/home/oron/git/maze_game/maps";
-
     maps_list.clear();
     for(const auto &entry : std::filesystem::directory_iterator(maps_dir))
     {

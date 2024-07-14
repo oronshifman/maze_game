@@ -7,6 +7,8 @@
 #ifndef __MAZEGAME_HPP__
 #define __MAZEGAME_HPP__
 
+#include <string>
+
 enum context
 {
     MAIN_MENU,
@@ -15,6 +17,15 @@ enum context
     IN_GAME,
 
     NUM_CONTEXTS
+};
+
+enum game_state
+{
+    STOP_RUNNING,
+    KEEP_RUNNING,
+    LOAD_MAP,
+
+    NUM_STATES
 };
 
 enum key_codes
@@ -33,6 +44,8 @@ enum move_direction
 
     NUM_DIRECTIONS
 };
+
+const std::string maps_dir = "/home/oron/git/maze_game/maps";
 
 void StartGame();
 void EndGame();

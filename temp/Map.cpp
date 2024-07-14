@@ -39,6 +39,46 @@ Map::~Map()
     delete buf;
 }
 
+ b8 Map::LoadNewMap()
+{
+    b8 status = 1;
+
+    ReadWidthAndHeight(loadedMap);
+
+    // seeks to lines to the beginning of the map
+    loadedMap.ignore(256, '\n');
+    loadedMap.ignore(256, '\n');
+
+    if(map)
+    {
+        char *mapPos;
+
+        for(u8 row = 0; row < buf.height; ++row)
+        {
+            for(u8 col = 0; col < buf.width; ++col)
+            {
+                mapPos = buf.indexBuffer(row, col);
+                *mapPos = loadedMap.get();
+
+                if(*mapPos == 'P')
+                {
+                    playerPosition[X] = col;
+                    playerPosition[Y] = row;
+                }
+            }
+        }
+
+        *mapPos = '\n';
+    }
+    else
+    {
+        status = 0;
+    }
+
+    return status;
+}
+
+
 b8 Map::DrawMap()
 {
     b8 status = 1;
