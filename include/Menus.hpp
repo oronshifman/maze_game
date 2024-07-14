@@ -7,25 +7,35 @@
 #ifndef __MENUS_HPP__
 #define __MENUS_HPP__
 
+#include <string>
+
 #include "MazeGame.hpp"
-#include "Screen.hpp"
+#include <vector> // vector
+#include <string> // std::string
 #include "my_int.h"
 
-enum main_menu_choices
+namespace main_menu_choices
 {
-    START, QUIT,
+    enum main_menu_choices
+    {
+        START, QUIT,
 
-    NUM_CHOICES
-};
+        NUM_CHOICES
+    };
+}
 
-enum start_menu_choices
+namespace start_menu_choices
 {
-    RANDOM_MAP,
-    CHOOSE_MAP,
-    CREATE_MAP,
+    enum start_menu_choices
+    {
+        RANDOM_MAP,
+        CHOOSE_MAP,
+        CREATE_MAP,
+        BACK,
 
-    NUM_CHOICES
-};
+        NUM_CHOICES
+    };
+}
 
 class Menus
 {
@@ -34,15 +44,20 @@ public:
     ~Menus();
 
     void Draw();
-    void ChooseMenu(context context);
-    void Scroll(char key);
+    void ChangeMenu(context context);
 
-    context curr_menu;
+    /**
+     * if QUIT is chosen, return 0 to turn running to 0
+     * else return 1
+     */
+    b8 Scroll(u8 key);
+
+    context curr_context;
     u8 curr_option;
     u8 size;
 
 private:
-    char **curr_menu;
+    std::vector<std::string> *curr_menu;
 };
 
 #endif /* MENUS_HPP */

@@ -19,69 +19,105 @@
 
 static struct termios old, curr;
 
-static b8 GetTerminalSize(u32 *screenHeight, u32 *screenWidth);
-static void ClearTerminal();
+static b8 ConfigTerminal();
 
-MazeGame::MazeGame() : menus(MAIN_MENU)
+static b8 DrawBoard();
+
+static b8 GetTerminalSize(u32 *screenHeight, u32 *screenWidth);
+static b8 LoadNewMap(std::ifstream &loadedMap);
+static b8 ReadWidthAndHeight(std::ifstream &loadedMap);
+static void LoadBoard();
+
+static void HandleInput();
+static void InGameInput(u8 key);
+
+static void Logic();
+
+Menus menus(MAIN_MENU);
+Board board;
+
+Screen screen(&board, &menus);
+
+Buffer map;
+Sprite player;
+Sprite goal;
+
+b8 running = 1;
+b8 win = 0;
+
+void StartGame()
 {
     if(!ConfigTerminal())
     {
         std::cout << "failed to init game" << std::endl;
     }
 
-    board.InitBoard(&map, &player, &goal);
-    
-    ClearTerminal();
-    menus.Draw();
+    screen.Draw();
+
+    Logic();
 }
 
-MazeGame::~MazeGame()
+void EndGame()
 {
     tcsetattr(0, TCSANOW, &old);
 }
 
+static void Logic()
+{
+    while(running)
+    {
+        HandleInput();
+        screen.Draw();
+    }
+}
+
+
 // TODO(13.7.24): implement loading map
+static b8 LoadNewMap(std::ifstream &loadedMap)
+{
+    b8 status = 1;
 
-// b8 MazeGame::LoadNewMap(std::ifstream &loadedMap)
-// {
-//     b8 status = 1;
+    // ReadWidthAndHeight(loadedMap);
 
-//     ReadWidthAndHeight(loadedMap);
+    // // seeks to lines to the beginning of the map
+    // loadedMap.ignore(256, '\n');
+    // loadedMap.ignore(256, '\n');
 
-//     // seeks to lines to the beginning of the map
-//     loadedMap.ignore(256, '\n');
-//     loadedMap.ignore(256, '\n');
+    // if(map)
+    // {
+    //     char *mapPos;
 
-//     if(map)
-//     {
-//         char *mapPos;
+    //     for(u8 row = 0; row < buf.height; ++row)
+    //     {
+    //         for(u8 col = 0; col < buf.width; ++col)
+    //         {
+    //             mapPos = buf.indexBuffer(row, col);
+    //             *mapPos = loadedMap.get();
 
-//         for(u8 row = 0; row < buf.height; ++row)
-//         {
-//             for(u8 col = 0; col < buf.width; ++col)
-//             {
-//                 mapPos = buf.indexBuffer(row, col);
-//                 *mapPos = loadedMap.get();
+    //             if(*mapPos == 'P')
+    //             {
+    //                 playerPosition[X] = col;
+    //                 playerPosition[Y] = row;
+    //             }
+    //         }
+    //     }
 
-//                 if(*mapPos == 'P')
-//                 {
-//                     playerPosition[X] = col;
-//                     playerPosition[Y] = row;
-//                 }
-//             }
-//         }
+    //     *mapPos = '\n';
+    // }
+    // else
+    // {
+    //     status = 0;
+    // }
 
-//         *mapPos = '\n';
-//     }
-//     else
-//     {
-//         status = 0;
-//     }
+    return status;
+}
 
-//     return status;
-// }
+static void LoadBoard()
+{
 
-b8 MazeGame::ReadWidthAndHeight(std::ifstream &loadedMap)
+}
+
+static b8 ReadWidthAndHeight(std::ifstream &loadedMap)
 {
     s32 tmpWidth, tmpHeight;
     loadedMap >> tmpWidth;
@@ -100,9 +136,9 @@ b8 MazeGame::ReadWidthAndHeight(std::ifstream &loadedMap)
     return 1;
 }
 
-void MazeGame::InGameInput(char key)
+static void InGameInput(u8 key)
 {
-    u16 posableMoves[NUM_DIRECTIONS] = 
+    s32 posableMoves[NUM_DIRECTIONS] = 
     {
         player.yPos - 1, player.yPos + 1,
         player.xPos - 2, player.xPos + 2
@@ -113,8 +149,7 @@ void MazeGame::InGameInput(char key)
         case 'q':
         case ESC_KEY:
         {
-            ClearTerminal();
-            menus.Draw();
+            screen.ChangeContext(MAIN_MENU);
         } break;
 
         case UP_KEY:
@@ -156,7 +191,7 @@ void MazeGame::InGameInput(char key)
     }
 }
 
-b8 MazeGame::DrawBoard()
+static b8 DrawBoard()
 {
     u32 screenHeight = 0, screenWidth = 0; // NOTE(14.7.24): currently not used
     GetTerminalSize(&screenHeight, &screenWidth);
@@ -164,16 +199,17 @@ b8 MazeGame::DrawBoard()
     return 0;
 }
 
-void MazeGame::HandleInput(context context)
+static void HandleInput()
 {
-    char c = getchar();
+    u8 c = getchar();    
 
-    switch(context)
+    switch(screen.curr_context)
     {
         case MAIN_MENU:
         case START_MENU:
         {
-            menus.Scroll(c);
+            b8 ret = menus.Scroll(c);
+            running = ret;
         } break;
 
         case IN_GAME:
@@ -190,7 +226,7 @@ void MazeGame::HandleInput(context context)
 
 
 
-b8 MazeGame::ConfigTerminal()
+static b8 ConfigTerminal()
 {
     b8 status = 1;
 
@@ -237,23 +273,3 @@ static b8 GetTerminalSize(u32 *screenHeight, u32 *screenWidth)
     return status;
 }
 
-static void ClearTerminal()
-{
-    printf("\e[2J");
-    printf("\e[0:0H");
-}
-
-// static void DrawMenu(u8 choice)
-// {
-//     for(u8 option = 0; option < menu.size; ++option)
-//     {
-//         if(option == choice)
-//         {
-//             printf("\e[48;5;34m");
-//             printf("%s\n", menu.options[option]);
-//             printf("\e[0m");
-//             continue;
-//         }
-//         printf("%s\n", menu.options[option]);
-//     }
-// }

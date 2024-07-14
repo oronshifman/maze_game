@@ -10,12 +10,8 @@
 
 int main(void)
 {
-	MazeGame game;
-
-    while(game.running)
-    {
-        game.HandleInput(MAIN_MENU);
-    }
+    StartGame();
+    EndGame();
 
 	return 0;
 }

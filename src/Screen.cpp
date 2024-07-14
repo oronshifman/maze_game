@@ -5,7 +5,10 @@
 /* ------------------------------------------*/
 
 #include "Screen.hpp"
+#include "Menus.hpp"
 #include "Board.hpp"
+
+static void ClearTerminal();
 
 Screen::Screen(Board *newBoard, Menus *newMenus)
 {
@@ -29,10 +32,18 @@ void Screen::Draw()
 {
     if(curr_context == IN_GAME)
     {
+        ClearTerminal();
         board->Draw();
     }
     else
     {
+        ClearTerminal();
         menu->Draw();
     }
+}
+
+static void ClearTerminal()
+{
+    printf("\e[2J");
+    printf("\e[0:0H");
 }

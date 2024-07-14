@@ -13,11 +13,12 @@ class Sprite
 {
 public:
     Sprite();
-    Sprite(u8 xPos, u8 yPos, char presentsAs);
     ~Sprite();
 
-    u8 xPos;
-    u8 yPos;
+    void InitSprite(u16 xPos, u16 yPos, char presentsAs);
+    
+    u16 xPos;
+    u16 yPos;
 
     char presentsAs;
 };

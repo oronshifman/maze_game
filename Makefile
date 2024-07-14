@@ -1,8 +1,8 @@
-OBJS = test/main.cpp src/MazeGame.cpp src/Buffer.cpp src/Sprite.cpp
+OBJS = test/main.cpp src/MazeGame.cpp src/Buffer.cpp src/Sprite.cpp src/Menus.cpp src/Screen.cpp src/Board.cpp
 
 CC = g++
 
-COMPILER_FLAGS = -Wall -Wextra
+COMPILER_FLAGS = 
 
 INCLUDE_DIR = include
 

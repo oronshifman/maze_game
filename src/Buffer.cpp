@@ -18,9 +18,14 @@ Buffer::Buffer()
     mem = nullptr;
 }
 
-Buffer::Buffer(u16 width, u16 height, u16 xPos, u16 yPos)
+void Buffer::InitBuffer(u16 newWidth, u16 newHeight, u16 newXPos, u16 newYPos)
 {
-    // TODO(13.7.24): imple
+    width = newWidth;
+    height = newHeight;
+    xPos = newXPos;
+    yPos = newYPos;
+
+    mem = new char[width * height];
 }
 
 Buffer::Buffer(const Buffer &src)

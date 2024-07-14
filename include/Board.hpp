@@ -4,8 +4,8 @@
 /* Author:   Oron                            */ 
 /* ------------------------------------------*/
 
-#ifndef __MENUS_HPP__
-#define __MENUS_HPP__
+#ifndef __BOARD_HPP__
+#define __BOARD_HPP__
 
 #include "Buffer.hpp"
 #include "Sprite.hpp"
@@ -25,4 +25,4 @@ private:
     Sprite *goal;
 };
 
-#endif /* MENUS_HPP */
+#endif /* BOARD_HPP */

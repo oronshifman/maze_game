@@ -14,12 +14,17 @@ Sprite::Sprite()
     presentsAs = '0';
 }
 
-Sprite::Sprite(u8 xPos, u8 yPos, char presentsAs)
+void Sprite::InitSprite(u16 newXPos, u16 newYPos, char newPresentsAs)
 {
-    // TODO(13.7.24): imple
+    xPos = newXPos;
+    yPos = newYPos;
+    presentsAs = newPresentsAs;
 }
 
 Sprite::~Sprite()
 {
-    // TODO(13.7.24): imple
+    xPos = 0;
+    yPos = 0;
+
+    presentsAs = '0';
 }

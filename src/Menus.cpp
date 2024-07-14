@@ -4,42 +4,68 @@
 /* Author:   Oron                            */ 
 /* ------------------------------------------*/
 
-#include <stdio.h>
+#include <stdio.h> // printf()
+#include <string> // std::string
+#include <filesystem> // directory_iterator()
+#include <vector>
 
 #include "Menus.hpp"
 
-#define NUM_MENUS 2
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
+#define NUM_MENUS 3
 
-char *main_menu_options[NUM_CHOICES] =
+struct menu_t
+{
+    std::vector<std::string> *options;
+    u64 size;
+};
+
+static void UpdateMapsList();
+
+static std::vector<std::string> maps_list;
+
+std::vector<std::string> main_menu_options
 {
     "START",
     "QUIT"
 };
 
-char *start_menu_options[NUM_CHOICES] =
+std::vector<std::string> start_menu_options
 {
     "RANDOM MAP",
     "CHOOSE MAP",
-    "CREATE MAP"
+    "CREATE MAP",
+    "BACK"
 };
 
-char **menus[NUM_MENUS] =
+menu_t main_menu = {&main_menu_options, main_menu_choices::NUM_CHOICES};
+menu_t start_menu = {&start_menu_options, start_menu_choices::NUM_CHOICES};
+menu_t maps_menu = {&maps_list};
+
+menu_t *game_menus[NUM_MENUS] =
 {
-    main_menu_options,
-    start_menu_options
+    &main_menu,
+    &start_menu,
+    &maps_menu
 };
 
 Menus::Menus(context context)
 {
-    curr_menu = menus[context];
-    size = ARRAY_SIZE(curr_menu);
-    curr_option = 0;
+    ChangeMenu(context);
 }
 
 Menus::~Menus()
 {
     // NOTE(14.7.24): do nothing
+}
+
+void Menus::ChangeMenu(context context)
+{
+    menu_t *chosen_menu = game_menus[context];
+
+    curr_context = context;
+    curr_menu = chosen_menu->options;
+    size = chosen_menu->size;
+    curr_option = 0;
 }
 
 void Menus::Draw()
@@ -49,22 +75,15 @@ void Menus::Draw()
         if(option == curr_option)
         {
             printf("\e[48;5;34m");
-            printf("%s\n", curr_menu[option]);
+            printf("%s\n", curr_menu->at(option).c_str());
             printf("\e[0m");
             continue;
         }
-        printf("%s\n", curr_menu[option]);
+        printf("%s\n", curr_menu->at(option).c_str());
     }
 }
 
-void Menus::ChooseMenu(context context)
-{
-    curr_menu = menus[context];
-    size = ARRAY_SIZE(curr_menu);
-    curr_option = 0;
-}
-
-void Menus::Scroll(char key)
+b8 Menus::Scroll(u8 key)
 {
     switch(key)
     {
@@ -78,9 +97,80 @@ void Menus::Scroll(char key)
             curr_option = ++curr_option % size;
         } break;
 
+        case ENTER_KEY:
+        {
+            switch(curr_context)
+            {
+                case MAIN_MENU:
+                {
+                    switch (curr_option)
+                    {
+                        case main_menu_choices::START:
+                        {
+                            ChangeMenu(START_MENU);
+                        } break;
+
+                        case main_menu_choices::QUIT:
+                        {
+                            return 0;
+                        } break;
+                    
+                        default:
+                        {
+
+                        } break;
+                    }
+                } break;
+
+                case START_MENU:
+                {
+                    switch (curr_option)
+                    {
+                        case start_menu_choices::RANDOM_MAP:
+                        {
+                        } break;
+
+                        case start_menu_choices::CHOOSE_MAP:
+                        {
+                            UpdateMapsList();
+                            ChangeMenu(MAPS_MENU);
+                        } break;
+
+                        case start_menu_choices::CREATE_MAP:
+                        {
+                        } break;
+
+                        case start_menu_choices::BACK:
+                        {
+                            ChangeMenu(MAIN_MENU);
+                        } break;
+                    
+                        default:
+                        {
+
+                        } break;
+                    }
+                }
+            }
+        }
+
         default:
         {
             // do nothing
         } break;
     }
+
+    return 1;
+}
+
+static void UpdateMapsList()
+{
+    std::string maps_dir = "/home/oron/git/maze_game/maps";
+
+    maps_list.clear();
+    for(const auto &entry : std::filesystem::directory_iterator(maps_dir))
+    {
+        maps_list.push_back(entry.path().filename());
+    }
+    maps_menu.size = maps_list.size();
 }

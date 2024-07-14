@@ -11,15 +11,6 @@
 #include "Board.hpp"
 #include "my_int.h"
 
-enum context
-{
-    MAIN_MENU,
-    START_MENU,
-    IN_GAME,
-
-    NUM_CONTEXTS
-};
-
 class Screen
 {
 public:
