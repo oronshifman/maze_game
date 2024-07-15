@@ -30,18 +30,20 @@ void Buffer::InitBuffer(u16 newWidth, u16 newHeight, u16 newXPos, u16 newYPos)
 
 Buffer::Buffer(const Buffer &src)
 {
-    // TODO(13.7.24): imple
+    // TODO(13.7.24): STUB
+    return;
 }
 
 Buffer &Buffer::operator=(const Buffer &src)
 {
-    // TODO(13.7.24): insert return statement here
+    // TODO(13.7.24): insert return statement here; STUB
     return *this;
 }
 
 Buffer::~Buffer()
 {
-    // TODO(13.7.24): imple
+    delete[] mem;
+    mem = nullptr;
 }
 
 char *Buffer::indexBuffer(u16 row, u16 col)

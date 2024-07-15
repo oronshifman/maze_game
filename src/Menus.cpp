@@ -20,8 +20,8 @@ struct menu_t
 };
 
 static void UpdateMapsList();
-static void StartMenuHandleInput(Menus menus, u8 curr_option);
-static b8 MainMenuHandleInput(Menus menus, u8 curr_option);
+static void StartMenuHandleInput(Menus &menus, u8 curr_option);
+static b8 MainMenuHandleInput(Menus &menus, u8 curr_option);
 
 static std::vector<std::string> maps_list;
 
@@ -123,7 +123,28 @@ b8 Menus::Scroll(u8 key)
                     return LOAD_MAP;
                 } break;
             }
-        }
+        } break;
+
+        case 'q':
+        {
+            switch(curr_context)
+            {
+                case MAIN_MENU:
+                {
+                    return STOP_RUNNING;   
+                } break;
+
+                case START_MENU:
+                {
+                    ChangeMenu(MAIN_MENU);
+                } break;
+
+                case MAPS_MENU:
+                {
+                    ChangeMenu(START_MENU);
+                } break;
+            }
+        } break;
 
         default:
         {
@@ -134,7 +155,7 @@ b8 Menus::Scroll(u8 key)
     return 1;
 }
 
-static void StartMenuHandleInput(Menus menus, u8 curr_option)
+static void StartMenuHandleInput(Menus &menus, u8 curr_option)
 {
     switch (curr_option)
     {
@@ -164,7 +185,7 @@ static void StartMenuHandleInput(Menus menus, u8 curr_option)
     }
 }
 
-static b8 MainMenuHandleInput(Menus menus, u8 curr_option)
+static b8 MainMenuHandleInput(Menus &menus, u8 curr_option)
 {
     switch (curr_option)
     {

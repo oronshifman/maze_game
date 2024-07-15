@@ -26,10 +26,11 @@ static b8 DrawBoard();
 static b8 GetTerminalSize(u32 *screenHeight, u32 *screenWidth);
 static b8 LoadNewMap();
 static b8 ReadWidthAndHeight(std::ifstream &loadedMap);
-static void LoadBoard();
 
 static void HandleInput();
 static void InGameInput(u8 key);
+static b8 IsNewPlayerPosWall(u16 playerNewX, u16 playerNewY);
+static b8 IsNewPlayerPosGoal();
 
 static void Logic();
 
@@ -55,6 +56,7 @@ void StartGame()
         std::cout << "failed to init game" << std::endl;
     }
 
+    board.InitBoard(&map, &player, &goal);
     screen.Draw();
 
     Logic();
@@ -72,10 +74,16 @@ static void Logic()
     {
         HandleInput();
         screen.Draw();
+        
+        if(win)
+        {
+            // TODO(15.7.24): add a win screen
+            screen.ChangeContext(START_MENU);
+            screen.Draw();
+        }
     }
 }
 
-// TODO(13.7.24): implement loading map
 static b8 LoadNewMap()
 {
     b8 status = 1;
@@ -104,13 +112,11 @@ static b8 LoadNewMap()
 
                 if(*mapPos == 'P')
                 {
-                    player.xPos = col;
-                    player.yPos = row;
+                    player.InitSprite(col, row, 'P');
                 }
                 else if(*mapPos == 'G')
                 {
-                    goal.xPos = col;
-                    goal.yPos = row;
+                    goal.InitSprite(col, row, 'G');
                 }
             }
         }
@@ -143,56 +149,55 @@ static b8 ReadWidthAndHeight(std::ifstream &loadedMap)
     return 1;
 }
 
-static void LoadBoard()
-{
-
-}
-
 static void InGameInput(u8 key)
 {
     s32 posableMoves[NUM_DIRECTIONS] = 
     {
-        player.yPos - 1, player.yPos + 1,
-        player.xPos - 2, player.xPos + 2
+        player.currYPos - 1, player.currYPos + 1,
+        player.currXPos - 2, player.currXPos + 2
     };
 
     switch(key)
     {
         case 'q':
-        case ESC_KEY:
         {
-            screen.ChangeContext(MAIN_MENU);
+            screen.ChangeContext(START_MENU);
+            map.~Buffer(); // NOTE: clear buffer
         } break;
 
         case UP_KEY:
         {
-            if(posableMoves[MOVE_UP] >= 0) 
+            if(posableMoves[MOVE_UP] >= 0 && 
+               !(IsNewPlayerPosWall(player.currXPos, posableMoves[MOVE_UP]))) 
             {
-                player.yPos = posableMoves[MOVE_UP];
+                player.RequestMove(MOVE_UP);
             }
         } break;
 
         case DOWN_KEY:
         {
-            if(posableMoves[MOVE_DOWN] < map.height) 
+            if(posableMoves[MOVE_DOWN] < map.height && 
+               !(IsNewPlayerPosWall(player.currXPos, posableMoves[MOVE_DOWN]))) 
             {
-                player.yPos = posableMoves[MOVE_DOWN];
+                player.RequestMove(MOVE_DOWN);
             }
         } break;
 
         case LEFT_KEY:
         {
-            if(posableMoves[MOVE_LEFT] >= 0) 
+            if(posableMoves[MOVE_LEFT] >= 0 && 
+               !(IsNewPlayerPosWall(posableMoves[MOVE_LEFT], player.currYPos)))
             {
-                player.xPos = posableMoves[MOVE_LEFT];
+                player.RequestMove(MOVE_LEFT);
             }
         } break;
 
         case RIGHT_KEY:
         {
-            if(posableMoves[MOVE_RIGHT] < map.width - 1) 
+            if(posableMoves[MOVE_RIGHT] < map.width - 1 && 
+               !(IsNewPlayerPosWall(posableMoves[MOVE_RIGHT], player.currYPos))) 
             {
-                player.xPos = posableMoves[MOVE_RIGHT];
+                player.RequestMove(MOVE_RIGHT);
             }
         } break;
 
@@ -200,6 +205,11 @@ static void InGameInput(u8 key)
         {
             // do nothing
         } break;
+    }
+
+    if(IsNewPlayerPosGoal())
+    {
+        win = 1;
     }
 }
 
@@ -235,7 +245,6 @@ static void HandleInput()
                 case LOAD_MAP:
                 {
                     LoadNewMap();
-                    LoadBoard();
                     screen.ChangeContext(IN_GAME);
                 } break;
 
@@ -317,3 +326,22 @@ static b8 GetTerminalSize(u32 *screenHeight, u32 *screenWidth)
     return status;
 }
 
+static b8 IsNewPlayerPosWall(u16 playerNewX, u16 playerNewY)
+{
+    char *newPos = map.indexBuffer(playerNewY, playerNewX);
+    if(*newPos == 'W')
+    {
+        return 1;
+    }
+    return 0;
+}
+
+static b8 IsNewPlayerPosGoal()
+{
+    char *newPos = map.indexBuffer(player.currYPos, player.currXPos);
+    if(*newPos == 'G')
+    {
+        return 1;
+    }
+    return 0;
+}

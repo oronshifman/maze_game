@@ -20,6 +20,7 @@ public:
     void InitBuffer(u16 width, u16 height, u16 xPos, u16 yPos);
     char *indexBuffer(u16 row, u16 col);
 
+
     u16 width;
     u16 height;
 

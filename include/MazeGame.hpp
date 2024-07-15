@@ -30,7 +30,6 @@ enum game_state
 
 enum key_codes
 {
-    ESC_KEY = 27,
     ENTER_KEY = '\n',
     UP_KEY = 'A',
     DOWN_KEY = 'B',
