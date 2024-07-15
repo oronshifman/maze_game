@@ -3,14 +3,10 @@
 
 # Exclude these files:
 !/**/
-!**/*.c
-!**/*.h
-!**/*.cpp
+!src/*.cpp
+!test/*.cpp
 !**/*.hpp
-!**/*.sh
 !**/*.md
 !.gitignore
 !Makefile
-!*.bmp
-!*.png
 !maps/*
