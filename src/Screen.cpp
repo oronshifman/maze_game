@@ -44,6 +44,7 @@ void Screen::Draw()
 
 static void ClearTerminal()
 {
-    printf("\e[3J");    // clear terminal
+    printf("\e[2J");    // clear terminal
+    printf("\e[3J");    // clear scrollback buffer
     printf("\e[0:0H");  // move cursor to left corner of terminal
 }
